@@ -1,0 +1,7 @@
+awscli
+click==7.0
+gensim
+jupyter==1.0.0
+numpy
+pandas
+sagemaker

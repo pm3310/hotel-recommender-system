@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+# coding=utf-8
+from __future__ import print_function
+
+import os
+import sys;sys.path.append("..")
+import traceback
+
+from src.models.train_model import train as train_model
+
+"""
+When Amazon SageMaker executes training, this train script runs just 
+like a regular Python script. The EC2 server that
+will run this script will be initialized with the following directories:
+
+/opt/ml
+├── input
+│   ├── config
+│   │   ├── hyperparameters.json
+│   │   └── resourceConfig.json
+│   └── data
+│       └── <channel_name> example: training
+│           └── <input data>
+├── model
+│   └── <model files>
+└── output
+    └── failure 
+    
+The input:
+
+/opt/ml/input/config contains configuration to control how your program runs. 
+hyperparameters.json is a JSON-formatted dictionary of hyperparameter names 
+to values. These values will always be strings, so you may need to convert 
+them. resourceConfig.json is a JSON-formatted file that describes the network 
+layout used for distributed training. 
+Since scikit-learn doesn't support distributed training, we'll ignore it here.
+
+/opt/ml/input/data/<channel_name>/ (for File mode) contains the input data 
+for that channel. 
+
+/opt/ml/input/data/<channel_name>_<epoch_number> (for Pipe mode) is the pipe
+for a given epoch. Epochs start at zero and go up by one each time you read 
+them. There is no limit to the number of epochs that you can run, but you 
+must close each pipe before reading the next epoch.
+
+The output:
+
+/opt/ml/model/ is the directory where you write the model (or any other file) that your program generates. SageMaker 
+will package any files in this directory into a compressed tar archive file.
+This file will be available at an S3 location.
+
+/opt/ml/output is a directory where the algorithm can write a file failure
+that describes why the job failed. 
+"""
+
+_PREFIX = '/opt/ml/'
+
+_INPUT_PATH = _PREFIX + 'input/data/training'
+_OUTPUT_PATH = os.path.join(_PREFIX, 'output')
+_MODEL_PATH = os.path.join(_PREFIX, 'model')
+_HYPER_PARAM_PATH = os.path.join(
+    _PREFIX, 'input/config/hyperparameters.json'
+)
+_FAILURE_OUTPUT_PATH = os.path.join(_OUTPUT_PATH, 'failure')
+
+
+def train():
+    print('Starting the training.')
+    try:
+        data_input_file = os.path.join(_INPUT_PATH, 'sentences.pkl')
+
+        model_save_path = os.path.join(_MODEL_PATH, 'hotelcluster2vec.bin')
+
+        train_model(data_input_file, model_save_path)
+
+        print('Training complete.')
+    except Exception as e:
+        # Write out an error file. This will be returned as the
+        # failureReason in the
+        # DescribeTrainingJob result.
+        trc = traceback.format_exc()
+        if _FAILURE_OUTPUT_PATH:
+            with open(os.path.join(_FAILURE_OUTPUT_PATH, 'failure'), 'w') \
+                    as s:
+                s.write('Exception during training: ' + str(e) + '\n' + trc)
+            # Printing this causes the exception to be in the training
+            # job logs, as well.
+            print(
+                'Exception during training: ' + str(e) + '\n' + trc,
+                file=sys.stderr
+            )
+
+        # A non-zero exit code causes the training job to be marked as
+        # Failed.
+        sys.exit(255)
+
+
+if __name__ == '__main__':
+    train()
+
+    # A zero exit code causes the job to be marked a succeeded.
+    sys.exit(0)
