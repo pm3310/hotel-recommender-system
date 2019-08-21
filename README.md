@@ -1,7 +1,7 @@
 hotel-recommender-system
 ==============================
 
-Hotel recommender system based on Expedia data set using Word2Vec technique on AWS SageMaker
+Hotel recommender system based on Expedia data set using Word2Vec technique on AWS SageMaker. The project structure is based on https://github.com/pm3310/cookiecutter-data-science 
 
 Create Environment
 ------------
