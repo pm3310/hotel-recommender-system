@@ -1,6 +1,9 @@
 hotel-recommender-system
 ==============================
 
+**How I built this: Learn how to build a hotel recommender quickly!** Learn how to apply machine learning to a complex challenges with this fun use case. Using an open-source command-line utility, you will train and deploy a hotel recommender system on Amazon SageMaker in a few simple steps, including using Word2Vec models, which are popular in NLP tasks, with recommendation problems by solving underlying operation, workflow, and engineering challenges that many enterprise data scientists face in.
+
+
 Hotel recommender system based on Expedia data set using Word2Vec technique on AWS SageMaker. The project structure is based on https://github.com/pm3310/cookiecutter-data-science 
 
 Create Environment
